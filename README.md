@@ -9,11 +9,11 @@ Web app for testing out trading strategies on historical stock data. Threw this 
 ## What it does
 
 - Renders candlestick charts using TradingView's lightweight-charts (super smooth, no lag)
+- **Pulls real market data from Finnhub API** (with demo mode fallback)
 - Dark theme that won't burn your eyes during late night trading sessions
 - Shows backtest metrics: total return, max drawdown, win rate, etc.
 - Works on mobile too (responsive design)
-- Mock data generator for testing without needing API keys
-- Clean structure if you want to hook it up to a real backend later
+- Toggle between live data and demo mode with one click
 
 ## Design
 
@@ -41,11 +41,17 @@ cd Market-Sentiment-Project
 # install stuff
 npm install
 
+# add your API keys (optional - works without them in demo mode)
+# create .env.local and add:
+# NEXT_PUBLIC_FINNHUB_API_KEY=your_key_here
+
 # run it
 npm run dev
 ```
 
 Open http://localhost:3000 and you should see the dashboard.
+
+**Note:** The app works out of the box! If you don't add API keys, it uses demo data. Add a Finnhub API key to get real market data.
 
 ## How it's organized
 
@@ -72,23 +78,26 @@ app/
 
 ## Using it
 
-1. Type in a ticker (AAPL, TSLA, whatever)
+1. Type in a ticker (AAPL, TSLA, NVDA, whatever)
 2. Pick your date range
 3. Hit "Run Backtest"
-4. Watch the chart load with candlesticks and check out the metrics
+4. Watch the chart load with real candlestick data
+5. Toggle between real data and demo mode with the button in the header
 
-Right now it uses mock data, but the structure is there if you want to connect a real backend. Just swap out the functions in `utils/mockData.ts`:
+**Real Data:** Uses Finnhub API to fetch actual historical stock prices
+**Demo Mode:** Generates realistic mock data if you don't have API keys
 
-```typescript
-// replace this with your actual API
-export async function runBacktest(ticker, startDate, endDate) {
-  const response = await fetch('your-api-endpoint', {
-    method: 'POST',
-    body: JSON.stringify({ ticker, startDate, endDate }),
-  });
-  return response.json();
-}
-```
+## Getting API Keys
+
+**Finnhub** (for stock data):
+1. Sign up at https://finnhub.io/
+2. Get your free API key
+3. Add it to `.env.local`:
+   ```
+   NEXT_PUBLIC_FINNHUB_API_KEY=your_key_here
+   ```
+
+Free tier gives you 60 API calls/minute, which is plenty for testing.
 
 ## Customizing
 
