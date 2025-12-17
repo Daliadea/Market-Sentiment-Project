@@ -54,7 +54,7 @@ The app **automatically falls back to demo mode** when the API fails, so:
 To test if your Finnhub key works, run this in your browser console:
 
 ```javascript
-fetch('https://finnhub.io/api/v1/quote?symbol=AAPL&token=d50mlh9r01qm94qmu0r0d50mlh9r01qm94qmu0rg')
+fetch('https://finnhub.io/api/v1/quote?symbol=AAPL&token=YOUR_API_KEY_HERE')
   .then(r => r.json())
   .then(d => console.log(d));
 ```
@@ -77,19 +77,17 @@ If Finnhub keeps giving issues, you can use Alpha Vantage instead:
 
 ---
 
-## Current API Keys
+## API Keys Setup
 
 **Finnhub:**
-```
-d50mlh9r01qm94qmu0r0d50mlh9r01qm94qmu0rg
-```
-Status: ⚠️ Returning 403 error (needs verification or is invalid)
+- Get your key from: https://finnhub.io/dashboard
+- Add to .env.local: `NEXT_PUBLIC_FINNHUB_API_KEY=your_key_here`
+- Status: Check if verified and active
 
 **Gemini:**
-```
-AIzaSyCKqxIPnTXxicOXWfMA7bVlxKob7KQ7i1E
-```
-Status: ✅ Not yet used (ready for future AI features)
+- Get your key from: https://console.cloud.google.com/apis/credentials
+- Add to .env.local: `NEXT_PUBLIC_GEMINI_API_KEY=your_key_here`
+- Status: Ready for future AI features
 
 ---
 

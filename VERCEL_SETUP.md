@@ -17,7 +17,7 @@ Your app is deployed but needs API keys added to Vercel. Here's how:
 3. **Add your Finnhub API key:**
    ```
    Name: NEXT_PUBLIC_FINNHUB_API_KEY
-   Value: d50mlh9r01qm94qmu0r0d50mlh9r01qm94qmu0rg
+   Value: [YOUR_FINNHUB_API_KEY]
    Environment: Production, Preview, Development (check all)
    ```
    Click **"Save"**
@@ -25,7 +25,7 @@ Your app is deployed but needs API keys added to Vercel. Here's how:
 4. **Add your Gemini API key (optional, for future features):**
    ```
    Name: NEXT_PUBLIC_GEMINI_API_KEY
-   Value: AIzaSyCKqxIPnTXxicOXWfMA7bVlxKob7KQ7i1E
+   Value: [YOUR_GEMINI_API_KEY]
    Environment: Production, Preview, Development (check all)
    ```
    Click **"Save"**
@@ -109,15 +109,16 @@ Open http://localhost:3000 - should work perfectly with real data!
 
 ---
 
-## Your APIs
+## Getting Your API Keys
 
 **Finnhub** (Stock data):
-- Key: `d50mlh9r01qm94qmu0r0d50mlh9r01qm94qmu0rg`
+- Sign up: https://finnhub.io/register
+- Get free API key from dashboard
 - Free tier: 60 API calls/minute
 - Docs: https://finnhub.io/docs/api
 
-**Gemini** (AI features, not yet used):
-- Key: `AIzaSyCKqxIPnTXxicOXWfMA7bVlxKob7KQ7i1E`
+**Gemini** (AI features, for future use):
+- Get key: https://console.cloud.google.com/apis/credentials
 - Ready for future sentiment analysis features
 
 ---
