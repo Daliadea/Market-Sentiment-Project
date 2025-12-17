@@ -55,23 +55,34 @@ export default function CandlestickChart({ data, height = 600 }: CandlestickChar
     });
 
     // Create candlestick series
-    // @ts-ignore - lightweight-charts v5 API compatibility
-    const candlestickSeries = chart.addCandlestickSeries?.({
-      upColor: '#10b981',
-      downColor: '#f43f5e',
-      borderUpColor: '#10b981',
-      borderDownColor: '#f43f5e',
-      wickUpColor: '#10b981',
-      wickDownColor: '#f43f5e',
-    }) || chart.addSeries({
-      type: 'Candlestick',
-      upColor: '#10b981',
-      downColor: '#f43f5e',
-      borderUpColor: '#10b981',
-      borderDownColor: '#f43f5e',
-      wickUpColor: '#10b981',
-      wickDownColor: '#f43f5e',
-    } as any);
+    // Try different methods for compatibility
+    let candlestickSeries;
+    try {
+      // Method 1: Try addCandlestickSeries (older versions)
+      if (typeof (chart as any).addCandlestickSeries === 'function') {
+        candlestickSeries = (chart as any).addCandlestickSeries({
+          upColor: '#10b981',
+          downColor: '#f43f5e',
+          borderUpColor: '#10b981',
+          borderDownColor: '#f43f5e',
+          wickUpColor: '#10b981',
+          wickDownColor: '#f43f5e',
+        });
+      } else {
+        // Method 2: Use addSeries with type (newer versions)
+        candlestickSeries = (chart as any).addSeries('Candlestick', {
+          upColor: '#10b981',
+          downColor: '#f43f5e',
+          borderUpColor: '#10b981',
+          borderDownColor: '#f43f5e',
+          wickUpColor: '#10b981',
+          wickDownColor: '#f43f5e',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to create candlestick series:', error);
+      throw error;
+    }
 
     chartRef.current = chart;
     seriesRef.current = candlestickSeries;

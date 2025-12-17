@@ -22,10 +22,21 @@ export async function fetchRealStockData(
   const url = `${BASE_URL}/stock/candle?symbol=${ticker}&resolution=D&from=${startTimestamp}&to=${endTimestamp}&token=${FINNHUB_API_KEY}`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'X-Finnhub-Token': FINNHUB_API_KEY,
+      },
+    });
     
     if (!response.ok) {
-      throw new Error(`Finnhub API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('Finnhub API error:', response.status, errorText);
+      
+      if (response.status === 403) {
+        throw new Error('API key invalid or rate limited. Using demo data.');
+      }
+      
+      throw new Error(`Finnhub API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
