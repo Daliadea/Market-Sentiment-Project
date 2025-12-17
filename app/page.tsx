@@ -14,11 +14,13 @@ export default function Home() {
   const [currentTicker, setCurrentTicker] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [useRealData, setUseRealData] = useState(true); // default to real data
+  const [dataSource, setDataSource] = useState<'real' | 'demo' | null>(null);
 
   const handleRunBacktest = async (ticker: string, startDate: string, endDate: string) => {
     setIsLoading(true);
     setCurrentTicker(ticker);
     setError('');
+    setDataSource(null);
     
     try {
       // Try real data first if enabled
@@ -27,11 +29,11 @@ export default function Home() {
           const { data, results } = await runAlphaVantageBacktest(ticker, startDate, endDate);
           setChartData(data);
           setResults(results);
-          setError(''); // Clear any previous errors
+          setError('');
+          setDataSource('real'); // Mark as real data
           return;
         } catch (apiError: any) {
           console.warn('Alpha Vantage API failed, falling back to mock data:', apiError);
-          // Don't show error if we're falling back to mock data
           // Fall through to mock data
         }
       }
@@ -40,10 +42,12 @@ export default function Home() {
       const { data, results } = await runBacktest(ticker, startDate, endDate);
       setChartData(data);
       setResults(results);
-      setError(''); // Always clear error when data loads successfully
+      setError('');
+      setDataSource('demo'); // Mark as demo data
     } catch (error) {
       console.error('Error running backtest:', error);
       setError('Failed to load data. Please try again.');
+      setDataSource(null);
     } finally {
       setIsLoading(false);
     }
@@ -84,9 +88,28 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Error message */}
+        {/* Data source indicator */}
+        {dataSource === 'real' && (
+          <div className="mt-2 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded text-emerald-400 text-sm flex items-center gap-2">
+            <span className="text-emerald-500">✓</span>
+            Using real market data from Alpha Vantage (last 100 days)
+          </div>
+        )}
+        {dataSource === 'demo' && useRealData && (
+          <div className="mt-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400 text-sm flex items-center gap-2">
+            <span className="text-amber-500">ℹ</span>
+            Using demo data (Alpha Vantage API unavailable or date range too old)
+          </div>
+        )}
+        {dataSource === 'demo' && !useRealData && (
+          <div className="mt-2 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 text-sm flex items-center gap-2">
+            <span className="text-blue-500">ℹ</span>
+            Demo mode active - showing realistic simulated data
+          </div>
+        )}
         {error && (
-          <div className="mt-2 px-3 py-2 bg-rose-500/10 border border-rose-500/20 rounded text-rose-400 text-sm">
+          <div className="mt-2 px-3 py-2 bg-rose-500/10 border border-rose-500/20 rounded text-rose-400 text-sm flex items-center gap-2">
+            <span className="text-rose-500">✕</span>
             {error}
           </div>
         )}
