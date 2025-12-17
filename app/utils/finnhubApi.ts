@@ -22,11 +22,8 @@ export async function fetchRealStockData(
   const url = `${BASE_URL}/stock/candle?symbol=${ticker}&resolution=D&from=${startTimestamp}&to=${endTimestamp}&token=${FINNHUB_API_KEY}`;
 
   try {
-    const response = await fetch(url, {
-      headers: {
-        'X-Finnhub-Token': FINNHUB_API_KEY,
-      },
-    });
+    // Finnhub only accepts token as URL parameter, not headers
+    const response = await fetch(url);
     
     if (!response.ok) {
       const errorText = await response.text();
