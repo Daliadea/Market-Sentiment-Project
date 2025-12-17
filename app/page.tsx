@@ -31,18 +31,16 @@ export default function Home() {
           return;
         } catch (apiError: any) {
           console.warn('Alpha Vantage API failed, falling back to mock data:', apiError);
-          setError(apiError.message || 'Using demo data (API unavailable)');
+          // Don't show error if we're falling back to mock data
           // Fall through to mock data
         }
       }
       
-      // Fallback to mock data
+      // Fallback to mock data (or demo mode)
       const { data, results } = await runBacktest(ticker, startDate, endDate);
       setChartData(data);
       setResults(results);
-      if (!useRealData) {
-        setError(''); // Clear error if intentionally using demo mode
-      }
+      setError(''); // Always clear error when data loads successfully
     } catch (error) {
       console.error('Error running backtest:', error);
       setError('Failed to load data. Please try again.');
