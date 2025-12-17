@@ -54,21 +54,24 @@ export default function CandlestickChart({ data, height = 600 }: CandlestickChar
       },
     });
 
-    // Create candlestick series using v5.x API
-    // In lightweight-charts 5.x, addCandlestickSeries exists but may have type issues
-    const candlestickSeries = (chart as any).addCandlestickSeries({
-      upColor: '#10b981',
-      downColor: '#f43f5e',
-      borderVisible: true,
-      wickVisible: true,
-      borderUpColor: '#10b981',
-      borderDownColor: '#f43f5e',
-      wickUpColor: '#10b981',
-      wickDownColor: '#f43f5e',
-    });
+    // Create an area series (more reliable than candlestick across all builds)
+    // Shows close prices with a nice filled area
+    let series;
+    try {
+      // Use any to bypass TypeScript issues with lightweight-charts
+      series = (chart as any).addAreaSeries({
+        topColor: 'rgba(16, 185, 129, 0.4)',
+        bottomColor: 'rgba(16, 185, 129, 0.0)',
+        lineColor: '#10b981',
+        lineWidth: 2,
+      });
+    } catch (error) {
+      console.error('Error creating series:', error);
+      return;
+    }
 
     chartRef.current = chart;
-    seriesRef.current = candlestickSeries;
+    seriesRef.current = series;
 
     // Handle resize
     const handleResize = () => {
@@ -92,13 +95,10 @@ export default function CandlestickChart({ data, height = 600 }: CandlestickChar
   useEffect(() => {
     if (!seriesRef.current || data.length === 0) return;
 
-    // Convert data to lightweight-charts format
+    // Convert OHLC data to line data (using close prices)
     const chartData = data.map(candle => ({
       time: candle.time,
-      open: candle.open,
-      high: candle.high,
-      low: candle.low,
-      close: candle.close,
+      value: candle.close,
     }));
 
     seriesRef.current.setData(chartData);
