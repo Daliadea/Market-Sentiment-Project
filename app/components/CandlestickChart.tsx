@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
-import type { IChartApi, ISeriesApi, CandlestickData } from 'lightweight-charts';
 import { OHLCData } from '../types/trading';
 
 interface CandlestickChartProps {
@@ -12,8 +11,8 @@ interface CandlestickChartProps {
 
 export default function CandlestickChart({ data, height = 600 }: CandlestickChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const chartRef = useRef<any>(null);
+  const seriesRef = useRef<any>(null);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -55,15 +54,24 @@ export default function CandlestickChart({ data, height = 600 }: CandlestickChar
       },
     });
 
-    // Create candlestick series with type assertion
-    const candlestickSeries = (chart as any).addCandlestickSeries({
+    // Create candlestick series
+    // @ts-ignore - lightweight-charts v5 API compatibility
+    const candlestickSeries = chart.addCandlestickSeries?.({
       upColor: '#10b981',
       downColor: '#f43f5e',
       borderUpColor: '#10b981',
       borderDownColor: '#f43f5e',
       wickUpColor: '#10b981',
       wickDownColor: '#f43f5e',
-    }) as ISeriesApi<'Candlestick'>;
+    }) || chart.addSeries({
+      type: 'Candlestick',
+      upColor: '#10b981',
+      downColor: '#f43f5e',
+      borderUpColor: '#10b981',
+      borderDownColor: '#f43f5e',
+      wickUpColor: '#10b981',
+      wickDownColor: '#f43f5e',
+    } as any);
 
     chartRef.current = chart;
     seriesRef.current = candlestickSeries;
@@ -91,7 +99,7 @@ export default function CandlestickChart({ data, height = 600 }: CandlestickChar
     if (!seriesRef.current || data.length === 0) return;
 
     // Convert data to lightweight-charts format
-    const chartData: CandlestickData[] = data.map(candle => ({
+    const chartData = data.map(candle => ({
       time: candle.time,
       open: candle.open,
       high: candle.high,
