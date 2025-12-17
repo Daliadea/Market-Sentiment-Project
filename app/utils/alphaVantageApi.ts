@@ -15,8 +15,9 @@ export async function fetchAlphaVantageData(
     throw new Error('Alpha Vantage API key not found. Check your .env.local file.');
   }
 
-  // Alpha Vantage returns daily data for the full history
-  const url = `${BASE_URL}?function=TIME_SERIES_DAILY&symbol=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}&outputsize=full`;
+  // Alpha Vantage free tier: compact = last 100 days, full = premium only
+  // Using compact for free tier compatibility
+  const url = `${BASE_URL}?function=TIME_SERIES_DAILY&symbol=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}&outputsize=compact`;
 
   try {
     const response = await fetch(url);
