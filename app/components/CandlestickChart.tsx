@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { createChart, ColorType } from 'lightweight-charts';
+import { useEffect, useState } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { OHLCData } from '../types/trading';
 
 interface CandlestickChartProps {
@@ -10,108 +10,68 @@ interface CandlestickChartProps {
 }
 
 export default function CandlestickChart({ data, height = 600 }: CandlestickChartProps) {
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<any>(null);
-  const seriesRef = useRef<any>(null);
+  const [chartData, setChartData] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!chartContainerRef.current) return;
+    if (data.length === 0) return;
 
-    // Create chart instance
-    const chart = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth,
-      height: height,
-      layout: {
-        background: { type: ColorType.Solid, color: '#0f172a' },
-        textColor: '#94a3b8',
-      },
-      grid: {
-        vertLines: { color: '#1e293b' },
-        horzLines: { color: '#1e293b' },
-      },
-      crosshair: {
-        mode: 1,
-        vertLine: {
-          color: '#475569',
-          width: 1,
-          style: 2,
-          labelBackgroundColor: '#334155',
-        },
-        horzLine: {
-          color: '#475569',
-          width: 1,
-          style: 2,
-          labelBackgroundColor: '#334155',
-        },
-      },
-      rightPriceScale: {
-        borderColor: '#334155',
-      },
-      timeScale: {
-        borderColor: '#334155',
-        timeVisible: true,
-        secondsVisible: false,
-      },
-    });
-
-    // Create an area series (more reliable than candlestick across all builds)
-    // Shows close prices with a nice filled area
-    let series;
-    try {
-      // Use any to bypass TypeScript issues with lightweight-charts
-      series = (chart as any).addAreaSeries({
-        topColor: 'rgba(16, 185, 129, 0.4)',
-        bottomColor: 'rgba(16, 185, 129, 0.0)',
-        lineColor: '#10b981',
-        lineWidth: 2,
-      });
-    } catch (error) {
-      console.error('Error creating series:', error);
-      return;
-    }
-
-    chartRef.current = chart;
-    seriesRef.current = series;
-
-    // Handle resize
-    const handleResize = () => {
-      if (chartContainerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-        });
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (chartRef.current) {
-        chartRef.current.remove();
-      }
-    };
-  }, [height]);
-
-  useEffect(() => {
-    if (!seriesRef.current || data.length === 0) return;
-
-    // Convert OHLC data to line data (using close prices)
-    const chartData = data.map(candle => ({
+    const formatted = data.map(candle => ({
+      date: new Date(candle.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      price: candle.close,
       time: candle.time,
-      value: candle.close,
     }));
 
-    seriesRef.current.setData(chartData);
-
-    // Fit content to view
-    if (chartRef.current) {
-      chartRef.current.timeScale().fitContent();
-    }
+    setChartData(formatted);
   }, [data]);
 
+  if (chartData.length === 0) {
+    return (
+      <div className="w-full h-full bg-slate-900 rounded-lg overflow-hidden border border-slate-700 flex items-center justify-center">
+        <p className="text-slate-400">No data to display</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full h-full bg-slate-900 rounded-lg overflow-hidden border border-slate-700">
-      <div ref={chartContainerRef} className="w-full" />
+    <div className="w-full h-full bg-slate-900 rounded-lg overflow-hidden border border-slate-700 p-4">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={chartData}>
+          <defs>
+            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <XAxis 
+            dataKey="date" 
+            stroke="#94a3b8"
+            style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}
+          />
+          <YAxis 
+            stroke="#94a3b8"
+            style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}
+            domain={['auto', 'auto']}
+          />
+          <Tooltip 
+            contentStyle={{ 
+              backgroundColor: '#1e293b', 
+              border: '1px solid #334155',
+              borderRadius: '8px',
+              fontFamily: 'JetBrains Mono, monospace'
+            }}
+            labelStyle={{ color: '#94a3b8' }}
+          />
+          <Area 
+            type="monotone" 
+            dataKey="price" 
+            stroke="#10b981" 
+            strokeWidth={2}
+            fillOpacity={1} 
+            fill="url(#colorPrice)" 
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }

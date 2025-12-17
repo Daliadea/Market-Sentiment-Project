@@ -5,7 +5,7 @@ import CandlestickChart from './components/CandlestickChart';
 import ControlPanel from './components/ControlPanel';
 import { OHLCData, BacktestResults } from './types/trading';
 import { runBacktest } from './utils/mockData';
-import { runRealBacktest } from './utils/finnhubApi';
+import { runAlphaVantageBacktest } from './utils/alphaVantageApi';
 
 export default function Home() {
   const [chartData, setChartData] = useState<OHLCData[]>([]);
@@ -24,13 +24,14 @@ export default function Home() {
       // Try real data first if enabled
       if (useRealData) {
         try {
-          const { data, results } = await runRealBacktest(ticker, startDate, endDate);
+          const { data, results } = await runAlphaVantageBacktest(ticker, startDate, endDate);
           setChartData(data);
           setResults(results);
+          setError(''); // Clear any previous errors
           return;
-        } catch (apiError) {
-          console.warn('Real API failed, falling back to mock data:', apiError);
-          setError('Using demo data (API unavailable)');
+        } catch (apiError: any) {
+          console.warn('Alpha Vantage API failed, falling back to mock data:', apiError);
+          setError(apiError.message || 'Using demo data (API unavailable)');
           // Fall through to mock data
         }
       }
@@ -39,6 +40,9 @@ export default function Home() {
       const { data, results } = await runBacktest(ticker, startDate, endDate);
       setChartData(data);
       setResults(results);
+      if (!useRealData) {
+        setError(''); // Clear error if intentionally using demo mode
+      }
     } catch (error) {
       console.error('Error running backtest:', error);
       setError('Failed to load data. Please try again.');
@@ -57,7 +61,7 @@ export default function Home() {
               Trading Strategy Backtester
             </h1>
             <p className="text-sm text-slate-400 mt-1">
-              {useRealData ? '🟢 Live market data via Finnhub' : '⚪ Demo mode'}
+              {useRealData ? '🟢 Real market data via Alpha Vantage' : '⚪ Demo mode'}
             </p>
           </div>
           <div className="flex items-center gap-6">
@@ -107,7 +111,7 @@ export default function Home() {
                   Type a ticker (AAPL, TSLA, NVDA...) and hit &quot;Run Backtest&quot;
                 </p>
                 <p className="text-xs text-slate-500 mt-2">
-                  {useRealData ? 'Using real market data from Finnhub' : 'Using demo data'}
+                  {useRealData ? 'Using real market data from Alpha Vantage' : 'Using demo data'}
                 </p>
               </div>
             )}
