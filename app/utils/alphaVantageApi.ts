@@ -29,17 +29,21 @@ export async function fetchAlphaVantageData(
 
     // Check for API errors
     if (data['Error Message']) {
+      console.error('Alpha Vantage Error Message:', data['Error Message']);
       throw new Error('Invalid ticker symbol or API error');
     }
 
     if (data['Note']) {
+      console.warn('Alpha Vantage Note:', data['Note']);
       throw new Error('API rate limit reached. Please try again in a minute.');
     }
 
     const timeSeries = data['Time Series (Daily)'];
     
     if (!timeSeries) {
-      throw new Error('No data available for this ticker');
+      console.error('Alpha Vantage response:', data);
+      console.error('Available keys:', Object.keys(data));
+      throw new Error('No data available for this ticker. Alpha Vantage may require a premium key for this symbol.');
     }
 
     // Convert Alpha Vantage format to our OHLC format
@@ -68,9 +72,11 @@ export async function fetchAlphaVantageData(
     ohlcData.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
     if (ohlcData.length === 0) {
-      throw new Error('No data available for the selected date range');
+      console.warn(`Date range ${startDate} to ${endDate} returned no data from ${Object.keys(timeSeries).length} total data points`);
+      throw new Error('No data available for the selected date range. Try a more recent date range.');
     }
 
+    console.log(`Successfully parsed ${ohlcData.length} data points from Alpha Vantage`);
     return ohlcData;
   } catch (error) {
     console.error('Error fetching from Alpha Vantage:', error);

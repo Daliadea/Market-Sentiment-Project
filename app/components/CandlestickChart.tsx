@@ -33,8 +33,8 @@ export default function CandlestickChart({ data, height = 600 }: CandlestickChar
   }
 
   return (
-    <div className="w-full h-full bg-slate-900 rounded-lg overflow-hidden border border-slate-700 p-4">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full h-full bg-slate-900 rounded-lg overflow-hidden border border-slate-700 p-4" style={{ minHeight: '400px' }}>
+      <ResponsiveContainer width="100%" height="100%" minHeight={400}>
         <AreaChart data={chartData}>
           <defs>
             <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
