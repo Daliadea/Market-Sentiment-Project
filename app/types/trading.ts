@@ -21,3 +21,16 @@ export interface BacktestParams {
   endDate: string;
 }
 
+export interface LeadingIndicator {
+  name: string;
+  status: 'Bullish' | 'Neutral' | 'Bearish';
+  reason: string;
+}
+
+export interface FundamentalAnalysis {
+  sentiment_score: number;
+  sentiment_summary: string;
+  fair_value_estimate: string;
+  leading_indicators: LeadingIndicator[];
+}
+

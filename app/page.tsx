@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import CandlestickChart from './components/CandlestickChart';
 import ControlPanel from './components/ControlPanel';
-import { OHLCData, BacktestResults } from './types/trading';
+import FundamentalIntelligence from './components/FundamentalIntelligence';
+import { OHLCData, BacktestResults, FundamentalAnalysis } from './types/trading';
 import { runBacktest } from './utils/mockData';
 import { runAlphaVantageBacktest } from './utils/alphaVantageApi';
 
@@ -15,6 +16,34 @@ export default function Home() {
   const [error, setError] = useState<string>('');
   const [useRealData, setUseRealData] = useState(true); // default to real data
   const [dataSource, setDataSource] = useState<'real' | 'demo' | null>(null);
+  const [fundamentalData, setFundamentalData] = useState<FundamentalAnalysis | null>(null);
+  const [fundamentalLoading, setFundamentalLoading] = useState(false);
+
+  const fetchFundamentalAnalysis = async (ticker: string) => {
+    setFundamentalLoading(true);
+    try {
+      const response = await fetch('/api/fundamental-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ticker }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch fundamental analysis');
+      }
+
+      const data = await response.json();
+      setFundamentalData(data);
+    } catch (error) {
+      console.error('Error fetching fundamental analysis:', error);
+      // Set null but don't show error - AI analysis is optional
+      setFundamentalData(null);
+    } finally {
+      setFundamentalLoading(false);
+    }
+  };
 
   const handleRunBacktest = async (ticker: string, startDate: string, endDate: string) => {
     setIsLoading(true);
@@ -31,6 +60,9 @@ export default function Home() {
           setResults(results);
           setError('');
           setDataSource('real'); // Mark as real data
+          
+          // Fetch fundamental analysis in parallel
+          fetchFundamentalAnalysis(ticker);
           return;
         } catch (apiError: any) {
           console.warn('Alpha Vantage API failed, falling back to mock data:', apiError);
@@ -44,6 +76,9 @@ export default function Home() {
       setResults(results);
       setError('');
       setDataSource('demo'); // Mark as demo data
+      
+      // Fetch fundamental analysis even for demo data
+      fetchFundamentalAnalysis(ticker);
     } catch (error) {
       console.error('Error running backtest:', error);
       setError('Failed to load data. Please try again.');
@@ -117,25 +152,35 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Chart Area - 70% */}
-        <div className="flex-[7] p-6">
-          <div className="h-full flex items-center justify-center">
-            {chartData.length > 0 ? (
-              <CandlestickChart data={chartData} />
-            ) : (
-              <div className="text-center">
-                <div className="text-6xl mb-4">📊</div>
-                <h2 className="text-2xl font-bold text-slate-300 mb-2">
-                  Ready to go
-                </h2>
-                <p className="text-slate-400">
-                  Type a ticker (AAPL, TSLA, NVDA...) and hit &quot;Run Backtest&quot;
-                </p>
-                <p className="text-xs text-slate-500 mt-2">
-                  {useRealData ? 'Using real market data from Alpha Vantage' : 'Using demo data'}
-                </p>
-              </div>
-            )}
+        {/* Left Area - Chart + AI Analysis - 70% */}
+        <div className="flex-[7] overflow-y-auto">
+          <div className="p-6 space-y-6">
+            {/* Chart Area */}
+            <div className="h-[500px] flex items-center justify-center">
+              {chartData.length > 0 ? (
+                <CandlestickChart data={chartData} />
+              ) : (
+                <div className="text-center">
+                  <div className="text-6xl mb-4">📊</div>
+                  <h2 className="text-2xl font-bold text-slate-300 mb-2">
+                    Ready to go
+                  </h2>
+                  <p className="text-slate-400">
+                    Type a ticker (AAPL, TSLA, NVDA...) and hit &quot;Run Backtest&quot;
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2">
+                    {useRealData ? 'Using real market data from Alpha Vantage' : 'Using demo data'}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* AI Fundamental Intelligence Panel */}
+            <FundamentalIntelligence
+              data={fundamentalData}
+              loading={fundamentalLoading}
+              ticker={currentTicker}
+            />
           </div>
         </div>
 
