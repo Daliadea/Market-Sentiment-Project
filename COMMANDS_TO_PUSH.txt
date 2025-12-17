@@ -1,0 +1,79 @@
+===============================================
+   COMMANDS TO PUSH TO GITHUB
+===============================================
+
+STEP 1: Create Repository on GitHub
+------------------------------------
+Go to: https://github.com/new
+
+Repository name: trading-backtester
+Description: Algorithmic Trading Backtester - Visualize trading strategy performance
+Visibility: Public (or Private)
+
+⚠️ IMPORTANT: DO NOT check these boxes:
+   [ ] Add a README file
+   [ ] Add .gitignore  
+   [ ] Choose a license
+
+Click "Create repository"
+
+
+STEP 2: Run These Commands
+---------------------------
+Copy and paste these commands one by one.
+Replace YOUR_USERNAME with your actual GitHub username.
+
+# Add the remote repository
+git remote add origin https://github.com/YOUR_USERNAME/trading-backtester.git
+
+# Push your code
+git push -u origin main
+
+
+EXAMPLE (if your username is "johndoe"):
+-----------------------------------------
+git remote add origin https://github.com/johndoe/trading-backtester.git
+git push -u origin main
+
+
+STEP 3: Verify
+--------------
+Visit: https://github.com/YOUR_USERNAME/trading-backtester
+
+You should see:
+✅ 6 commits
+✅ All files including README.md
+✅ Project structure with app/, components/, etc.
+
+
+CURRENT STATUS:
+---------------
+✅ Project complete
+✅ All files committed (6 commits)
+✅ Build tested and passing
+✅ Ready to push!
+
+
+TROUBLESHOOTING:
+----------------
+If you see "remote origin already exists":
+   git remote remove origin
+   git remote add origin https://github.com/YOUR_USERNAME/trading-backtester.git
+   git push -u origin main
+
+If prompted for password:
+   Use a Personal Access Token instead
+   Get one at: https://github.com/settings/tokens
+
+
+AFTER PUSHING:
+--------------
+1. Deploy to Vercel: https://vercel.com/new
+2. Or try locally: npm run dev
+3. Read PROJECT_SUMMARY.md for next steps
+
+
+===============================================
+Ready? Create the repo and run the commands! 🚀
+===============================================
+
