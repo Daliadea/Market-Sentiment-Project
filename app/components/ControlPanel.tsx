@@ -10,9 +10,35 @@ interface ControlPanelProps {
 }
 
 export default function ControlPanel({ onRunBacktest, results, isLoading }: ControlPanelProps) {
+  // Calculate dates for free API tier (last 100 days)
+  const today = new Date();
+  const hundredDaysAgo = new Date();
+  hundredDaysAgo.setDate(today.getDate() - 100);
+  
+  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+  
   const [ticker, setTicker] = useState('AAPL');
-  const [startDate, setStartDate] = useState('2024-01-01');
-  const [endDate, setEndDate] = useState('2024-12-16');
+  const [startDate, setStartDate] = useState(formatDate(hundredDaysAgo));
+  const [endDate, setEndDate] = useState(formatDate(today));
+  const [dateWarning, setDateWarning] = useState('');
+
+  const handleDateChange = (type: 'start' | 'end', value: string) => {
+    const selectedDate = new Date(value);
+    const oldestAllowed = new Date();
+    oldestAllowed.setDate(oldestAllowed.getDate() - 100);
+    
+    if (selectedDate < oldestAllowed) {
+      setDateWarning('⚠️ Dates older than 100 days require Premium API. Using free tier = last 100 days only.');
+    } else {
+      setDateWarning('');
+    }
+    
+    if (type === 'start') {
+      setStartDate(value);
+    } else {
+      setEndDate(value);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +75,7 @@ export default function ControlPanel({ onRunBacktest, results, isLoading }: Cont
             type="date"
             id="startDate"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => handleDateChange('start', e.target.value)}
             className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono"
             required
           />
@@ -64,10 +90,23 @@ export default function ControlPanel({ onRunBacktest, results, isLoading }: Cont
             type="date"
             id="endDate"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => handleDateChange('end', e.target.value)}
+            max={formatDate(new Date())}
             className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono"
             required
           />
+        </div>
+
+        {/* Date Warning */}
+        {dateWarning && (
+          <div className="px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400 text-xs">
+            {dateWarning}
+          </div>
+        )}
+
+        {/* API Tier Info */}
+        <div className="px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg text-blue-400 text-xs">
+          💡 Free API: Last 100 days only. For older data, app uses realistic demo mode.
         </div>
 
         {/* Run Backtest Button */}
